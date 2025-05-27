@@ -35,6 +35,15 @@ tableroRouter.post('/creartablero', async (req: Request, res: Response) => {
     }
 });
 
+tableroRouter.post('/actualizar', async (req: Request, res: Response) => {
+    try {
+        const tablero = await TableroController.update(req.body);
+        res.status(201).json(tablero);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al crear tablero', details: err });
+    }
+});
+
 tableroRouter.delete('/eliminar/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id);

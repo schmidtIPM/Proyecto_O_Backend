@@ -36,7 +36,20 @@ export class TableroController {
     }) {
         return await TableroModel.create(tableroData);
     }
-
+    static async update(tableroData: {
+        id: number;
+        nombre?: string;
+        filas?: number;
+        columnas?: number;
+        mainTag?: mongoose.Types.ObjectId;
+        listaTags?: mongoose.Types.ObjectId[];
+    }) {
+        return await TableroModel.findOneAndUpdate(
+            { id: tableroData.id },       
+            { $set: tableroData },         
+            { new: true }              
+        );
+    }
     static async delete(id: number) {
         return await TableroModel.deleteOne({ id });
     }
