@@ -1,0 +1,19 @@
+[
+    { 
+      "id": 1,
+      "nombre": "A",
+      "filas": 3,
+      "columnas": 3,
+      "mainTag": 1,
+      "listaTags": [1,2]
+    },
+
+    { 
+      "id": 2,
+      "nombre": "B",
+      "filas": 5,
+      "columnas": 7,
+      "mainTag": 3,
+      "listaTags": [3,4,5,6]
+    }
+  ]

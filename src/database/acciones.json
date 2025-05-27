@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "tipo": "luz"
+    },
+    {
+        "id": 2,
+        "tipo": "movimiento"
+    },
+    {
+        "id": 3,
+        "tipo": "audio"
+    },
+    {
+        "id": 4,
+        "tipo": "audio"
+    },
+    {
+        "id": 5,
+        "tipo": "luz"
+    },
+    {
+        "id": 6,
+        "tipo": "movimiento"
+    }
+]

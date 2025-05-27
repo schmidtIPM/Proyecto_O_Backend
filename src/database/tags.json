@@ -1,0 +1,17 @@
+[
+    {
+        "ID": 1,
+        "listaAcciones": [1, 2, 3],
+        "posterior": 2
+    },
+    {
+        "ID": 2,
+        "listaAcciones": [4, 5],
+        "posterior": 3
+    },
+    {
+        "ID": 3,
+        "listaAcciones": [6],
+        "posterior": null
+    }
+]
