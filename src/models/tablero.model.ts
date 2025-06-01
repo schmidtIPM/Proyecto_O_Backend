@@ -1,18 +1,22 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import { ITag } from './tag.model';
 
-const TableroSchema = new Schema({
-    id: Number,
-    nombre: String,
-    filas: Number,
-    columnas: Number,
-    mainTag: {
-        type: Schema.Types.ObjectId,
-        ref: 'Tag',
-    },
-    listaTags: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tag',
-    }],
-});
+export interface ITablero extends Document {
+  id: number;
+  nombre: string;
+  filas: number;
+  columnas: number;
+  mainTag: Types.ObjectId;
+  listaTags: Types.ObjectId[];
+}
 
-export const TableroModel = mongoose.model('Tablero', TableroSchema);
+const TableroSchema = new Schema<ITablero>({
+  id: { type: Number, required: true },
+  nombre: { type: String, required: true },
+  filas: { type: Number, required: true },
+  columnas: { type: Number, required: true },
+  mainTag: { type: Schema.Types.ObjectId, ref: 'Tag', required: true },
+  listaTags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+}, { timestamps: true });
+
+export const TableroModel = mongoose.model<ITablero>('Tablero', TableroSchema);

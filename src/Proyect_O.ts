@@ -1,11 +1,14 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { tableroRouter } from './routes/tablero';
+import { connectToDatabase } from './database/database';
+import path from 'path';
+
 const app = express();
 const port = 3000;
 
 const whitelist = ['http://localhost:4200', 'https://miapp.com'];
-
+connectToDatabase();
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin || whitelist.includes(origin)) {
@@ -39,3 +42,4 @@ app.use((req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+app.use('/static/audio', express.static(path.join(__dirname, 'documentos/audio')));

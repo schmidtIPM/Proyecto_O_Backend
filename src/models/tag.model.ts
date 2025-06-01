@@ -1,16 +1,15 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import { AccionSchema, IAccion } from './accion.model';
 
-const TagSchema = new Schema({
-    ID: Number,
-    listaAcciones: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Accion'
-    }],
-    posterior: {
-        type: Schema.Types.ObjectId,
-        ref: 'Tag',
-        default: null
-    },
-});
+export interface ITag extends Document {
+  ID: number;
+  listaAcciones: IAccion[];
+  posterior?: Types.ObjectId | null;
+}
+const TagSchema = new Schema<ITag>({
+  ID: { type: Number, required: true },
+  listaAcciones: { type: [AccionSchema], default: [] },
+  posterior: { type: Schema.Types.ObjectId, ref: 'Tag', default: null },
+}, { timestamps: true });
 
-export const TagModel = mongoose.model('Tag', TagSchema);
+export const TagModel = mongoose.model<ITag>('Tag', TagSchema);
