@@ -34,7 +34,7 @@ export class TableroController {
       tag.listaAcciones.forEach((accion: any) => {
         if (accion && accion.tipo === 'audio') {
           const accionJson = JSON.parse(JSON.stringify(accion));
-          if (typeof accionJson.archivo === 'string') {
+          if (accionJson.archivo) {
             const normalizedPath = path.normalize(accionJson.archivo);
             const filename = path.basename(normalizedPath);
             accion.archivo = `/static/audio/${filename}`;
@@ -76,9 +76,10 @@ export class TableroController {
         .populate({
           path: 'listaTags',
           populate: { path: 'listaAcciones' },
-        });
+        }).lean();
       if (!tablero) return [404, { error: 'Tablero no encontrado' }];
-      return [200, TableroController.formatTablero(tablero)];
+      const tableroForm = await TableroController.formatTablero(tablero);
+      return [200, tableroForm];
     } catch (err) {
       return [500, { error: 'Error al buscar tablero', details: err }];
     }
