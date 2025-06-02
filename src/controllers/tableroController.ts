@@ -15,6 +15,8 @@ interface AccionInput {
 interface TagInput {
   ID: number;
   listaAcciones: AccionInput[];
+  fila: number;
+  columna: number;
 }
 interface TableroFullInput {
   id: number;
@@ -26,15 +28,19 @@ interface TableroFullInput {
 }
 
 export class TableroController {
-  static buildAudioURL(localPath: string): string {
-    const filename = path.basename(localPath);
-    return `/static/audio/${filename}`;
-  }
   static formatTablero(tablero: any) {
     const formatTag = (tag: any) => {
+      if (!Array.isArray(tag.listaAcciones)) { tag.listaAcciones = []; }
       tag.listaAcciones.forEach((accion: any) => {
-        if (accion.tipo === 'audio' && accion.archivo) {
-          accion.archivo = TableroController.buildAudioURL(accion.archivo);
+        if (accion && accion.tipo === 'audio') {
+          const accionJson = JSON.parse(JSON.stringify(accion));
+          if (typeof accionJson.archivo === 'string') {
+            const normalizedPath = path.normalize(accionJson.archivo);
+            const filename = path.basename(normalizedPath);
+            accion.archivo = `/static/audio/${filename}`;
+          } else {
+            console.warn('Archivo de audio no es una cadena:', accionJson.archivo);
+          }
         }
       });
       return tag;
@@ -43,7 +49,6 @@ export class TableroController {
     tablero.listaTags = tablero.listaTags.map(formatTag);
     return tablero;
   }
-
   static async getAll() {
     try {
       const tableros = await TableroModel.find()
@@ -54,16 +59,16 @@ export class TableroController {
         .populate({
           path: 'listaTags',
           populate: { path: 'listaAcciones' },
-        });
+        }).lean();
       const formatted = tableros.map(TableroController.formatTablero);
       return [200, formatted];
     } catch (err) {
       return [500, { error: 'Error al obtener tableros', details: err }];
     }
   }
-  static async getById(id: number) {
+  static async getById(id: string) {
     try {
-      const tablero = await TableroModel.findOne({ id })
+      const tablero = await TableroModel.findOne({ _id: id })
         .populate({
           path: 'mainTag',
           populate: { path: 'listaAcciones' },
@@ -144,13 +149,32 @@ export class TableroController {
   }
   static async delete(id: number) {
     try {
-      const result = await TableroModel.deleteOne({ id });
-      if (result.deletedCount === 0) {
+      const tablero = await TableroModel.findOne({ id });
+      if (!tablero) {
         return [404, { error: 'Tablero no encontrado' }];
       }
-      return [200, { message: 'Tablero eliminado' }];
+      const allTagIds = [
+        tablero.mainTag,
+        ...(tablero.listaTags || [])
+      ];
+      const tags = await TagModel.find({ _id: { $in: allTagIds } });
+      for (const tag of tags) {
+        for (const accion of tag.listaAcciones || []) {
+          console.log(`Procesando acción: ${JSON.stringify(accion)}`);
+          const accionJson = JSON.parse(JSON.stringify(accion));
+          if (accion.tipo === 'audio' && accionJson.archivo) {
+            const archivo = accionJson.archivo;
+            if (archivo) {
+              fs.unlinkSync(archivo);
+            }
+          }
+        }
+        await TagModel.deleteOne({ _id: tag._id });
+      }
+      const result = await TableroModel.deleteOne({ id });
+      return [200, { message: 'Tablero y datos asociados eliminados' }];
     } catch (err) {
-      return [500, { error: 'Error al eliminar tablero', details: err }];
+      return [500, { error: 'Error al eliminar tablero y datos relacionados', details: err }];
     }
   }
   static async createFull(data: TableroFullInput, fileMap: Record<string, string>): Promise<[number, string]> {

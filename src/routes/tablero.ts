@@ -12,8 +12,7 @@ tableroRouter.get('/', async (req, res) => {
   res.status(estado).json(body);
 });
 tableroRouter.get('/id/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const [status, body] = await TableroController.getById(id);
+  const [status, body] = await TableroController.getById(req.params.id);
   const estado = status as number;
   res.status(estado).json(body);
 });
