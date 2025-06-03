@@ -1,0 +1,14 @@
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Debug Backend",
+  "skipFiles": ["<node_internals>/**"],
+  "program": "${workspaceFolder}/src/index.ts", 
+  "runtimeArgs": [
+    "--inspect=9229"
+  ],
+  "preLaunchTask": "tsc: build - tsconfig.json",
+  "outFiles": [
+    "${workspaceFolder}/dist/**/*.ts" 
+  ]
+}

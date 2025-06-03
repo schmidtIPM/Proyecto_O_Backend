@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "debug": "ts-node --inspect-brk=9229 src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx ts-node ./src/Proyect_O.ts"
   },
