@@ -18,13 +18,26 @@ tableroRouter.get('/id/:id', async (req, res) => {
 });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir =  path.join(__dirname, '../documentos/audio');
+    let dir: string;
+    if (file.fieldname.includes('fondo')) {
+      dir = path.join(__dirname, '../documentos/img');
+    } else {
+      dir = path.join(__dirname, '../documentos/audio');
+    }
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
+    let nombreBase: string;
+    if (file.fieldname.includes('mainTag')) {
+      nombreBase = file.fieldname;
+    } else if (file.fieldname.includes('tag-')) {
+      nombreBase = file.fieldname;
+    } else {
+      nombreBase = `${Date.now()}-${file.originalname}`;
+    }
+    const ext = path.extname(file.originalname);
+    cb(null, `${nombreBase}${ext}`);
   }
 });
 const upload = multer({ storage });
@@ -41,21 +54,6 @@ tableroRouter.post('/creartablero', upload.any(), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al procesar el tablero' });
-  }
-});
-tableroRouter.put('/actualizar', upload.any(), async (req, res) => {
-  try {
-    const files = req.files as Express.Multer.File[];
-    const fileMap: Record<string, string> = {};
-    files.forEach((file) => {
-      fileMap[file.fieldname] = file.path;
-    });
-    const data = JSON.parse(req.body.data);
-    const [status, body] = await TableroController.updateFull(data, fileMap);
-    res.status(status).json(body);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al actualizar el tablero' });
   }
 });
 tableroRouter.delete('/eliminar/:id', async (req, res) => {

@@ -3,12 +3,12 @@ import { TableroModel } from '../models/tablero.model';
 import { TagModel } from '../models/tag.model';
 import fs from 'fs';
 import path from 'path';
-import { stringify } from 'querystring';
+
 interface AccionInput {
   delay: number;
   tipo: 'audio' | 'movimiento' | 'luz';
   archivo?: string;
-  direccion?: 'avanzar' | 'girar';
+  direccion?: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
   color?: string;
   intervalo?: number;
 }
@@ -17,6 +17,7 @@ interface TagInput {
   listaAcciones: AccionInput[];
   fila: number;
   columna: number;
+  fondo?: string;
 }
 interface TableroFullInput {
   id: number;
@@ -25,11 +26,25 @@ interface TableroFullInput {
   columnas: number;
   mainTag: TagInput;
   listaTags: TagInput[];
+  colorlineas: string;
+  fondo?: string;
 }
 
 export class TableroController {
   static formatTablero(tablero: any) {
+    const tableroJson = JSON.parse(JSON.stringify(tablero));
+    if(tablero.fondo && TableroController.isFilePath(tablero.fondo)){
+      const normalizedPath = path.normalize(tableroJson.archivo);
+      const filename = path.basename(normalizedPath);
+      tablero.fondo = `/static/img/${filename}`;
+    }
     const formatTag = (tag: any) => {
+      const tagJson = JSON.parse(JSON.stringify(tag));
+      if(tagJson.fondo && TableroController.isFilePath(tagJson.fondo)){
+        const normalizedPath = path.normalize(tableroJson.archivo);
+        const filename = path.basename(normalizedPath);
+        tag.fondo = `/static/img/${filename}`;
+      }
       if (!Array.isArray(tag.listaAcciones)) { tag.listaAcciones = []; }
       tag.listaAcciones.forEach((accion: any) => {
         if (accion && accion.tipo === 'audio') {
@@ -48,6 +63,20 @@ export class TableroController {
     tablero.mainTag = formatTag(tablero.mainTag);
     tablero.listaTags = tablero.listaTags.map(formatTag);
     return tablero;
+  }
+  static isFilePath(fondo: string): boolean {
+    console.log("funco");
+    return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
+  }
+  static moveImageFile(tempPath: string, fileName: string): string {console.log("asd");
+    const ext = path.extname(tempPath);
+    const destDir = path.join(__dirname, '..', 'documentos', 'img');
+    const destPath = path.join(destDir, fileName);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+    fs.copyFileSync(tempPath, destPath);
+    return `./documentos/img/${fileName}`;
   }
   static async getAll() {
     try {
@@ -84,84 +113,31 @@ export class TableroController {
       return [500, { error: 'Error al buscar tablero', details: err }];
     }
   }
-  static async updateFull(data: TableroFullInput, fileMap: Record<string, string>): Promise<[number, any]> {
-    try {
-      const existing = await TableroModel.findOne({ id: data.id })
-        .populate('mainTag')
-        .populate('listaTags');
-      if (!existing) return [404, { error: `Tablero con id ${data.id} no encontrado` }];
-      const oldTags = [existing.mainTag, ...(existing.listaTags || [])];
-      const oldAudioPaths: string[] = [];
-      oldTags.forEach((tag: any, tagIndex) => {
-        tag.listaAcciones.forEach((accion: any, accionIndex: number) => {
-          if (accion.tipo === 'audio' && accion.archivo) {
-            oldAudioPaths.push(accion.archivo);
-          }
-        });
-      });
-      data.mainTag.listaAcciones.forEach((accion, index) => {
-        if (accion.tipo === 'audio') {
-          const key = `mainTag-${index}`;
-          if (fileMap[key]) {
-            accion.archivo = fileMap[key];
-          }
-        }
-      });
-      data.listaTags.forEach((tag, tagIndex) => {
-        tag.listaAcciones.forEach((accion, accionIndex) => {
-          if (accion.tipo === 'audio') {
-            const key = `tag-${tagIndex}-accion-${accionIndex}`;
-            if (fileMap[key]) {
-              accion.archivo = fileMap[key];
-            }
-          }
-        });
-      });
-      await TagModel.deleteMany({ _id: { $in: oldTags.map(t => t._id) } });
-      const mainTag = new TagModel(data.mainTag);
-      await mainTag.save();
-      const listaTagsDocs = await Promise.all(
-        data.listaTags.map(async (tag) => {
-          const tagDoc = new TagModel(tag);
-          await tagDoc.save();
-          return tagDoc._id;
-        })
-      );
-      const updated = await TableroModel.findOneAndUpdate(
-        { id: data.id },
-        {
-          nombre: data.nombre,
-          filas: data.filas,
-          columnas: data.columnas,
-          mainTag: mainTag._id,
-          listaTags: listaTagsDocs,
-        },
-        { new: true }
-      );
-      oldAudioPaths.forEach(path => {
-        if (!Object.values(fileMap).includes(path) && fs.existsSync(path)) {
-          fs.unlinkSync(path);
-        }
-      });
-      return [200, updated];
-    } catch (err) {
-      return [500, { error: 'Error al actualizar tablero completo', details: err }];
-    }
-  }
   static async delete(id: number) {
     try {
       const tablero = await TableroModel.findOne({ id });
       if (!tablero) {
         return [404, { error: 'Tablero no encontrado' }];
       }
+      if(tablero.fondo && TableroController.isFilePath(tablero.fondo)){
+          const archivo = tablero.fondo;
+          if (archivo) {
+            fs.unlinkSync(archivo);
+          }
+        }
       const allTagIds = [
         tablero.mainTag,
         ...(tablero.listaTags || [])
       ];
       const tags = await TagModel.find({ _id: { $in: allTagIds } });
       for (const tag of tags) {
+        if(tag.fondo && TableroController.isFilePath(tag.fondo)){
+          const archivo = tag.fondo;
+          if (archivo) {
+            fs.unlinkSync(archivo);
+          }
+        }
         for (const accion of tag.listaAcciones || []) {
-          console.log(`Procesando acción: ${JSON.stringify(accion)}`);
           const accionJson = JSON.parse(JSON.stringify(accion));
           if (accion.tipo === 'audio' && accionJson.archivo) {
             const archivo = accionJson.archivo;
@@ -178,47 +154,61 @@ export class TableroController {
       return [500, { error: 'Error al eliminar tablero y datos relacionados', details: err }];
     }
   }
-  static async createFull(data: TableroFullInput, fileMap: Record<string, string>): Promise<[number, string]> {
-    try {
-      data.mainTag.listaAcciones.forEach((accion, index) => {
-        if (accion.tipo === 'audio') {
-          const key = `mainTag-${index}`;
-          if (fileMap[key]) accion.archivo = fileMap[key];
+  static async createFull(data: any, fileMap: Record<string, string>) {
+  try {
+    if (fileMap['fondo']) {
+      data.fondo = fileMap['fondo'];
+    }
+    if (fileMap['mainTag']) {
+      data.mainTag.fondo = fileMap['mainTag'];
+    }
+    if (data.mainTag.listaAcciones) {
+      data.mainTag.listaAcciones.forEach((accion: any, index: number) => {
+        const fieldKey = `mainTag-${index}`;
+        if (fileMap[fieldKey]) {
+          accion.archivo = fileMap[fieldKey];
         }
       });
-
-      data.listaTags.forEach((tag, tagIndex) => {
-        tag.listaAcciones.forEach((accion, accionIndex) => {
-          if (accion.tipo === 'audio') {
-            const key = `tag-${tagIndex}-accion-${accionIndex}`;
-            if (fileMap[key]) accion.archivo = fileMap[key];
-          }
-        });
-      });
-
-      const mainTag = await new TagModel(data.mainTag).save();
-
-      const listaTagsDocs = await Promise.all(
-        data.listaTags.map(async (tag) => {
-          const tagDoc = new TagModel(tag);
-          await tagDoc.save();
-          return tagDoc._id;
-        })
-      );
-
-      await TableroModel.create({
-        id: data.id,
-        nombre: data.nombre,
-        filas: data.filas,
-        columnas: data.columnas,
-        mainTag: mainTag._id,
-        listaTags: listaTagsDocs,
-      });
-
-      return [200, 'Tablero creado con éxito'];
-    } catch (err) {
-      console.error(err);
-      return [500, 'Error al crear el tablero'];
     }
+    if (data.listaTags) {
+      data.listaTags.forEach((tag: any, tagIndex: number) => {
+        const tagKey = `tag-${tagIndex}`;
+        if (fileMap[tagKey]) {
+          tag.fondo = fileMap[tagKey];
+        }
+
+        if (tag.listaAcciones) {
+          tag.listaAcciones.forEach((accion: any, accionIndex: number) => {
+            const accionKey = `tag-${tagIndex}-accion-${accionIndex}`;
+            if (fileMap[accionKey]) {
+              accion.archivo = fileMap[accionKey];
+            }
+          });
+        }
+      });
+    }
+    const allTags = [data.mainTag, ...(data.listaTags || [])];
+    const savedTags = [];
+
+    for (const tag of allTags) {
+      const tagDoc = new TagModel(tag);
+      const savedTag = await tagDoc.save();
+      savedTags.push(savedTag);
+    }
+    const tableroFinal = new TableroModel({
+      ...data,
+      mainTag: savedTags[0]._id,
+      listaTags: savedTags.slice(1).map((t) => t._id),
+    });
+
+    await tableroFinal.save();
+
+    return [200, 'Tablero guardado con éxito'];
+  } catch (error) {
+    console.error('Error en createFull:', error);
+    return [500, 'Error al guardar el tablero'];
   }
+}
+
+
 }

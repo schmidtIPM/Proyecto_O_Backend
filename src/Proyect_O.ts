@@ -36,6 +36,8 @@ app.use((err: Error, req: Request, res: Response, next: Function) => {
 });
 
 app.use('/static/audio', express.static(path.join(__dirname, 'documentos/audio')));
+app.use('/static/img', express.static(path.join(__dirname, 'documentos/img')));
+
 app.use((req, res) => {
   res.status(404).send({ mensaje: 'Ruta no encontrada' });
 });

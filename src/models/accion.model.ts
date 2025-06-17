@@ -29,13 +29,13 @@ export const AudioModel = AccionModel.discriminator<IAudio>(
 );
 
 export interface IMovimiento extends IAccion {
-  direccion: 'avanzar' | 'girar';
+  direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
 }
 
 export const MovimientoModel = AccionModel.discriminator<IMovimiento>(
   'movimiento',
   new Schema<IMovimiento>({
-    direccion: { type: String, enum: ['avanzar', 'girar'], default: 'avanzar' },
+    direccion: { type: String, enum: ['arriba', 'abajo', 'izquierda', 'derecha'], default: 'arriba' },
   }, { _id: false })
 );
 

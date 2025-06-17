@@ -8,6 +8,8 @@ export interface ITablero extends Document {
   columnas: number;
   mainTag: Types.ObjectId;
   listaTags: Types.ObjectId[];
+  fondo?: string;
+  colorlineas: string;
 }
 
 const TableroSchema = new Schema<ITablero>({
@@ -17,6 +19,8 @@ const TableroSchema = new Schema<ITablero>({
   columnas: { type: Number, required: true },
   mainTag: { type: Schema.Types.ObjectId, ref: 'Tag', required: true },
   listaTags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+  fondo: { type: String },
+  colorlineas: { type: String, required: true },
 }, { timestamps: true });
 
 export const TableroModel = mongoose.model<ITablero>('Tablero', TableroSchema);
