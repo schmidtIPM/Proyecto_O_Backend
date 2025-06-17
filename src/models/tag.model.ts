@@ -6,7 +6,7 @@ export interface ITag extends Document {
   fila: number;
   columna: number;
   listaAcciones: IAccion[];
-  fondo?: string;
+  fondo: String;
 }
 const TagSchema = new Schema<ITag>({
   ID: { type: Number, required: true },

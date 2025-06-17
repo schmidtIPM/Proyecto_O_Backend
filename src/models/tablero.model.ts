@@ -8,7 +8,7 @@ export interface ITablero extends Document {
   columnas: number;
   mainTag: Types.ObjectId;
   listaTags: Types.ObjectId[];
-  fondo?: string;
+  fondo: string;
   colorlineas: string;
 }
 

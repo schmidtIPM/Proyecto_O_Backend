@@ -131,10 +131,10 @@ export class TableroController {
       ];
       const tags = await TagModel.find({ _id: { $in: allTagIds } });
       for (const tag of tags) {
-        if(tag.fondo && TableroController.isFilePath(tag.fondo)){
+        if(tag.fondo && TableroController.isFilePath(tag.fondo.toString())){
           const archivo = tag.fondo;
           if (archivo) {
-            fs.unlinkSync(archivo);
+            fs.unlinkSync(archivo.toString());
           }
         }
         for (const accion of tag.listaAcciones || []) {
@@ -159,8 +159,8 @@ export class TableroController {
     if (fileMap['fondo']) {
       data.fondo = fileMap['fondo'];
     }
-    if (fileMap['mainTag']) {
-      data.mainTag.fondo = fileMap['mainTag'];
+    if (fileMap['mainTag-fondo']) {
+      data.mainTag.fondo = fileMap['mainTag-fondo'];
     }
     if (data.mainTag.listaAcciones) {
       data.mainTag.listaAcciones.forEach((accion: any, index: number) => {
@@ -172,7 +172,7 @@ export class TableroController {
     }
     if (data.listaTags) {
       data.listaTags.forEach((tag: any, tagIndex: number) => {
-        const tagKey = `tag-${tagIndex}`;
+        const tagKey = `tag-${tagIndex}-fondo`;
         if (fileMap[tagKey]) {
           tag.fondo = fileMap[tagKey];
         }

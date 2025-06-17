@@ -50,7 +50,7 @@ tableroRouter.post('/creartablero', upload.any(), async (req, res) => {
     });
     const data = JSON.parse(req.body.data);
     const [status, message] = await TableroController.createFull(data, fileMap);
-    res.status(status).json({ message });
+    res.status(status as number).json({ message });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al procesar el tablero' });
@@ -59,6 +59,5 @@ tableroRouter.post('/creartablero', upload.any(), async (req, res) => {
 tableroRouter.delete('/eliminar/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   const [status, body] = await TableroController.delete(id);
-  const estado = status as number;
-  res.status(estado).json(body);
+  res.status(status as number).json(body);
 });
