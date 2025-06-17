@@ -41,7 +41,7 @@ export class TableroController {
     const formatTag = (tag: any) => {
       const tagJson = JSON.parse(JSON.stringify(tag));
       if(tagJson.fondo && TableroController.isFilePath(tagJson.fondo)){
-        const normalizedPath = path.normalize(tableroJson.archivo);
+        const normalizedPath = path.normalize(tagJson.fondo);
         const filename = path.basename(normalizedPath);
         tag.fondo = `/static/img/${filename}`;
       }
@@ -65,10 +65,9 @@ export class TableroController {
     return tablero;
   }
   static isFilePath(fondo: string): boolean {
-    console.log("funco");
     return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
   }
-  static moveImageFile(tempPath: string, fileName: string): string {console.log("asd");
+  static moveImageFile(tempPath: string, fileName: string): string {
     const ext = path.extname(tempPath);
     const destDir = path.join(__dirname, '..', 'documentos', 'img');
     const destPath = path.join(destDir, fileName);
@@ -155,60 +154,56 @@ export class TableroController {
     }
   }
   static async createFull(data: any, fileMap: Record<string, string>) {
-  try {
-    if (fileMap['fondo']) {
-      data.fondo = fileMap['fondo'];
-    }
-    if (fileMap['mainTag-fondo']) {
-      data.mainTag.fondo = fileMap['mainTag-fondo'];
-    }
-    if (data.mainTag.listaAcciones) {
-      data.mainTag.listaAcciones.forEach((accion: any, index: number) => {
-        const fieldKey = `mainTag-${index}`;
-        if (fileMap[fieldKey]) {
-          accion.archivo = fileMap[fieldKey];
-        }
+    try {
+      if (fileMap['fondo']) {
+        data.fondo = fileMap['fondo'];
+      }
+      if (fileMap['mainTag-fondo']) {
+        data.mainTag.fondo = fileMap['mainTag-fondo'];
+      }
+      if (data.mainTag.listaAcciones) {
+        data.mainTag.listaAcciones.forEach((accion: any, index: number) => {
+          const fieldKey = `mainTag-${index}`;
+          if (fileMap[fieldKey]) {
+            accion.archivo = fileMap[fieldKey];
+          }
+        });
+      }
+      if (data.listaTags) {
+        data.listaTags.forEach((tag: any, tagIndex: number) => {
+          const tagKey = `tag-${tagIndex}-fondo`;
+          if (fileMap[tagKey]) {
+            tag.fondo = fileMap[tagKey];
+          }
+
+          if (tag.listaAcciones) {
+            tag.listaAcciones.forEach((accion: any, accionIndex: number) => {
+              const accionKey = `tag-${tagIndex}-accion-${accionIndex}`;
+              if (fileMap[accionKey]) {
+                accion.archivo = fileMap[accionKey];
+              }
+            });
+          }
+        });
+      }
+      const allTags = [data.mainTag, ...(data.listaTags || [])];
+      const savedTags = [];
+      for (const tag of allTags) {
+        const tagDoc = new TagModel(tag);
+        const savedTag = await tagDoc.save();
+        savedTags.push(savedTag);
+      }
+      const tableroFinal = new TableroModel({
+        ...data,
+        mainTag: savedTags[0]._id,
+        listaTags: savedTags.slice(1).map((t) => t._id),
       });
+      await tableroFinal.save();
+
+      return [200, 'Tablero guardado con éxito'];
+    } catch (error) {
+      console.error('Error en createFull:', error);
+      return [500, 'Error al guardar el tablero'];
     }
-    if (data.listaTags) {
-      data.listaTags.forEach((tag: any, tagIndex: number) => {
-        const tagKey = `tag-${tagIndex}-fondo`;
-        if (fileMap[tagKey]) {
-          tag.fondo = fileMap[tagKey];
-        }
-
-        if (tag.listaAcciones) {
-          tag.listaAcciones.forEach((accion: any, accionIndex: number) => {
-            const accionKey = `tag-${tagIndex}-accion-${accionIndex}`;
-            if (fileMap[accionKey]) {
-              accion.archivo = fileMap[accionKey];
-            }
-          });
-        }
-      });
-    }
-    const allTags = [data.mainTag, ...(data.listaTags || [])];
-    const savedTags = [];
-
-    for (const tag of allTags) {
-      const tagDoc = new TagModel(tag);
-      const savedTag = await tagDoc.save();
-      savedTags.push(savedTag);
-    }
-    const tableroFinal = new TableroModel({
-      ...data,
-      mainTag: savedTags[0]._id,
-      listaTags: savedTags.slice(1).map((t) => t._id),
-    });
-
-    await tableroFinal.save();
-
-    return [200, 'Tablero guardado con éxito'];
-  } catch (error) {
-    console.error('Error en createFull:', error);
-    return [500, 'Error al guardar el tablero'];
   }
-}
-
-
 }
