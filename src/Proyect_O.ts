@@ -3,6 +3,9 @@ import cors from 'cors';
 import { tableroRouter } from './routes/tablero';
 import { connectToDatabase } from './database/database';
 import path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const port = 3000;
