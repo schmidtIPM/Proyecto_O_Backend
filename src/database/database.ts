@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export async function connectToDatabase() {
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/Proyecto_O';
   if (!uri) {
     throw new Error('Uri no definido');
   }
