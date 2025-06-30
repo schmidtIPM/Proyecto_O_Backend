@@ -32,7 +32,6 @@ interface TableroFullInput {
 
 export class TableroController {
   static formatTablero(tablero: any) {
-    const tableroJson = JSON.parse(JSON.stringify(tablero));
     if(tablero.fondo && TableroController.isFilePath(tablero.fondo)){
       const normalizedPath = path.normalize(tablero.fondo);
       const filename = path.basename(normalizedPath);
