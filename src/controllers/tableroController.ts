@@ -175,7 +175,6 @@ export class TableroController {
           if (fileMap[tagKey]) {
             tag.fondo = fileMap[tagKey];
           }
-
           if (tag.listaAcciones) {
             tag.listaAcciones.forEach((accion: any, accionIndex: number) => {
               const accionKey = `tag-${tagIndex}-accion-${accionIndex}`;
@@ -193,6 +192,7 @@ export class TableroController {
         const savedTag = await tagDoc.save();
         savedTags.push(savedTag);
       }
+      console.log("hola ", (data))
       const tableroFinal = new TableroModel({
         ...data,
         mainTag: savedTags[0]._id,

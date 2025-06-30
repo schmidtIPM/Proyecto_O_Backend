@@ -10,6 +10,7 @@ export interface ITablero extends Document {
   listaTags: Types.ObjectId[];
   fondo: string;
   colorlineas: string;
+  tamanioCelda: number;
 }
 
 const TableroSchema = new Schema<ITablero>({
@@ -21,6 +22,7 @@ const TableroSchema = new Schema<ITablero>({
   listaTags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
   fondo: { type: String },
   colorlineas: { type: String, required: true },
+  tamanioCelda: { type: Number, required: true },
 }, { timestamps: true });
 
 export const TableroModel = mongoose.model<ITablero>('Tablero', TableroSchema);
