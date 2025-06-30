@@ -34,7 +34,7 @@ export class TableroController {
   static formatTablero(tablero: any) {
     const tableroJson = JSON.parse(JSON.stringify(tablero));
     if(tablero.fondo && TableroController.isFilePath(tablero.fondo)){
-      const normalizedPath = path.normalize(tableroJson.archivo);
+      const normalizedPath = path.normalize(tablero.fondo);
       const filename = path.basename(normalizedPath);
       tablero.fondo = `/static/img/${filename}`;
     }
@@ -155,8 +155,8 @@ export class TableroController {
   }
   static async createFull(data: any, fileMap: Record<string, string>) {
     try {
-      if (fileMap['fondo']) {
-        data.fondo = fileMap['fondo'];
+      if (fileMap['tablero-fondo']) {
+        data.fondo = fileMap['tablero-fondo'];
       }
       if (fileMap['mainTag-fondo']) {
         data.mainTag.fondo = fileMap['mainTag-fondo'];
