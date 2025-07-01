@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
-const whitelist = ['http://localhost:4200', 'https://miapp.com'];
+const whitelist = ['http://localhost:4200', 'https://miapp.com', 'https://proyecto-o.com', 'https://www.proyecto-o.com'];
 connectToDatabase();
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
