@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { ITag } from './tag.model';
 
 export interface ITablero extends Document {
   id: number;
@@ -11,6 +10,8 @@ export interface ITablero extends Document {
   fondo: string;
   colorlineas: string;
   tamanioCelda: number;
+  favoritos: boolean;
+  predeterminado: boolean;
 }
 
 const TableroSchema = new Schema<ITablero>({
@@ -23,6 +24,8 @@ const TableroSchema = new Schema<ITablero>({
   fondo: { type: String },
   colorlineas: { type: String, required: true },
   tamanioCelda: { type: Number, required: true },
+  favoritos: { type: Boolean, default: false },
+  predeterminado: { type: Boolean, default: false }
 }, { timestamps: true });
 
 export const TableroModel = mongoose.model<ITablero>('Tablero', TableroSchema);

@@ -61,3 +61,13 @@ tableroRouter.delete('/eliminar/:id', async (req, res) => {
   const [status, body] = await TableroController.delete(id);
   res.status(status as number).json(body);
 });
+tableroRouter.post('/actualizarFav/:idTablero/:ponerFavorito',async (req, res) => {
+  try {
+    const [status, message] = await TableroController.updateFav(
+      req.params.idTablero, req.params.ponerFavorito === 'true');
+    res.status(status as number).json({ message });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar el tablero' });
+  }
+});

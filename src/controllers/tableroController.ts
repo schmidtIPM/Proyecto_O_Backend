@@ -205,4 +205,18 @@ export class TableroController {
       return [500, 'Error al guardar el tablero'];
     }
   }
+  static async updateFav(tableroId: string, ponerFavorito: boolean) {
+    try {
+      const tablero = await TableroModel.findById({ _id: tableroId });
+      if (!tablero) {
+        return [404, 'Tablero no encontrado'];
+      }
+      tablero.favoritos = ponerFavorito;
+      await tablero.save();
+
+      return [200, 'Estado de favoritos actualizado'];
+    } catch (error) {
+      return [500, 'Error al actualizar favoritos'];
+    }
+  }
 }
