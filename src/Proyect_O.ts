@@ -4,6 +4,7 @@ import { tableroRouter } from './routes/tablero';
 import { connectToDatabase } from './database/database';
 import path from 'path';
 import * as dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -40,6 +41,14 @@ app.use((err: Error, req: Request, res: Response, next: Function) => {
 
 app.use('/static/audio', express.static(path.join(__dirname, 'documentos/audio')));
 app.use('/static/img', express.static(path.join(__dirname, 'documentos/img')));
+app.get('/static/imgPag', (req, res) => {
+  fs.readdir(path.join(__dirname, 'documentos/imgPag'), (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'No se pudo leer el directorio' });
+    }
+    res.json(files);
+  });
+});
 
 app.use((req, res) => {
   res.status(404).send({ mensaje: 'Ruta no encontrada' });

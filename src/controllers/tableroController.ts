@@ -191,7 +191,6 @@ export class TableroController {
         const savedTag = await tagDoc.save();
         savedTags.push(savedTag);
       }
-      console.log("hola ", (data))
       const tableroFinal = new TableroModel({
         ...data,
         mainTag: savedTags[0]._id,
