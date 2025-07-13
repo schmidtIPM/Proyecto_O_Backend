@@ -41,6 +41,7 @@ app.use((err: Error, req: Request, res: Response, next: Function) => {
 
 app.use('/static/audio', express.static(path.join(__dirname, 'documentos/audio')));
 app.use('/static/img', express.static(path.join(__dirname, 'documentos/img')));
+app.use('/static/imgPag', express.static(path.join(__dirname, 'documentos/imgPag')));
 app.get('/static/imgPag', (req, res) => {
   fs.readdir(path.join(__dirname, 'documentos/imgPag'), (err, files) => {
     if (err) {
