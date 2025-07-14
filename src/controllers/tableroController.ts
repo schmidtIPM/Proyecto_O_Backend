@@ -111,18 +111,18 @@ export class TableroController {
       return [500, { error: 'Error al buscar tablero', details: err }];
     }
   }
-  static async delete(id: number) {
+  static async delete(id: string) {
     try {
-      const tablero = await TableroModel.findOne({ id });
+      const tablero = await TableroModel.findOne({ _id : id });
       if (!tablero) {
         return [404, { error: 'Tablero no encontrado' }];
       }
       if(tablero.fondo && TableroController.isFilePath(tablero.fondo)){
-          const archivo = tablero.fondo;
-          if (archivo) {
-            fs.unlinkSync(archivo);
-          }
+        const archivo = tablero.fondo;
+        if (archivo) {
+          fs.unlinkSync(archivo);
         }
+      }
       const allTagIds = [
         tablero.mainTag,
         ...(tablero.listaTags || [])
@@ -146,7 +146,7 @@ export class TableroController {
         }
         await TagModel.deleteOne({ _id: tag._id });
       }
-      const result = await TableroModel.deleteOne({ id });
+      const result = await TableroModel.deleteOne({ _id: id });
       return [200, { message: 'Tablero y datos asociados eliminados' }];
     } catch (err) {
       return [500, { error: 'Error al eliminar tablero y datos relacionados', details: err }];

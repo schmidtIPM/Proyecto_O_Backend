@@ -57,8 +57,7 @@ tableroRouter.post('/creartablero', upload.any(), async (req, res) => {
   }
 });
 tableroRouter.delete('/eliminar/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const [status, body] = await TableroController.delete(id);
+  const [status, body] = await TableroController.delete(req.params.id);
   res.status(status as number).json(body);
 });
 tableroRouter.post('/actualizarFav/:idTablero/:ponerFavorito',async (req, res) => {
