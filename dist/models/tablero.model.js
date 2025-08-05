@@ -44,5 +44,8 @@ const TableroSchema = new mongoose_1.Schema({
     listaTags: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Tag' }],
     fondo: { type: String },
     colorlineas: { type: String, required: true },
+    tamanioCelda: { type: Number, required: true },
+    favoritos: { type: Boolean, default: false },
+    predeterminado: { type: Boolean, default: false }
 }, { timestamps: true });
 exports.TableroModel = mongoose_1.default.model('Tablero', TableroSchema);

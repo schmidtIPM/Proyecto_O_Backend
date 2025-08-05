@@ -11,8 +11,13 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
-const whitelist = ['http://localhost:4200', 'https://miapp.com', 'https://proyecto-o.com', 'https://www.proyecto-o.com'];
-connectToDatabase();
+const whitelist = [
+  'http://localhost:4200',
+  'https://miapp.com',
+  'https://proyecto-o.com',
+  'https://www.proyecto-o.com'
+];
+
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin || whitelist.includes(origin)) {
@@ -29,7 +34,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send({ mensaje: 'Hola, bienvenido a la API de tableros' });
 });
 
-app.use('/tablero',tableroRouter);
+app.use('/tablero', tableroRouter);
 
 app.use((err: Error, req: Request, res: Response, next: Function) => {
   if (err.message === 'No permitido por CORS') {
@@ -42,6 +47,7 @@ app.use((err: Error, req: Request, res: Response, next: Function) => {
 app.use('/static/audio', express.static(path.join(__dirname, 'documentos/audio')));
 app.use('/static/img', express.static(path.join(__dirname, 'documentos/img')));
 app.use('/static/imgPag', express.static(path.join(__dirname, 'documentos/imgPag')));
+
 app.get('/static/imgPag', (req, res) => {
   fs.readdir(path.join(__dirname, 'documentos/imgPag'), (err, files) => {
     if (err) {
@@ -55,8 +61,12 @@ app.use((req, res) => {
   res.status(404).send({ mensaje: 'Ruta no encontrada' });
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+if (process.env.JEST_WORKER_ID === undefined) {
+  connectToDatabase().then(() => {
+    app.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
+    });
+  });
+}
 
 export default app;

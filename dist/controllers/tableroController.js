@@ -19,9 +19,8 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 class TableroController {
     static formatTablero(tablero) {
-        const tableroJson = JSON.parse(JSON.stringify(tablero));
         if (tablero.fondo && TableroController.isFilePath(tablero.fondo)) {
-            const normalizedPath = path_1.default.normalize(tableroJson.archivo);
+            const normalizedPath = path_1.default.normalize(tablero.fondo);
             const filename = path_1.default.basename(normalizedPath);
             tablero.fondo = `/static/img/${filename}`;
         }
@@ -112,7 +111,7 @@ class TableroController {
     static delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const tablero = yield tablero_model_1.TableroModel.findOne({ id });
+                const tablero = yield tablero_model_1.TableroModel.findOne({ _id: id });
                 if (!tablero) {
                     return [404, { error: 'Tablero no encontrado' }];
                 }
@@ -145,7 +144,7 @@ class TableroController {
                     }
                     yield tag_model_1.TagModel.deleteOne({ _id: tag._id });
                 }
-                const result = yield tablero_model_1.TableroModel.deleteOne({ id });
+                const result = yield tablero_model_1.TableroModel.deleteOne({ _id: id });
                 return [200, { message: 'Tablero y datos asociados eliminados' }];
             }
             catch (err) {
@@ -156,8 +155,8 @@ class TableroController {
     static createFull(data, fileMap) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (fileMap['fondo']) {
-                    data.fondo = fileMap['fondo'];
+                if (fileMap['tablero-fondo']) {
+                    data.fondo = fileMap['tablero-fondo'];
                 }
                 if (fileMap['mainTag-fondo']) {
                     data.mainTag.fondo = fileMap['mainTag-fondo'];
@@ -200,6 +199,22 @@ class TableroController {
             catch (error) {
                 console.error('Error en createFull:', error);
                 return [500, 'Error al guardar el tablero'];
+            }
+        });
+    }
+    static updateFav(tableroId, ponerFavorito) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tablero = yield tablero_model_1.TableroModel.findById({ _id: tableroId });
+                if (!tablero) {
+                    return [404, 'Tablero no encontrado'];
+                }
+                tablero.favoritos = ponerFavorito;
+                yield tablero.save();
+                return [200, 'Estado de favoritos actualizado'];
+            }
+            catch (error) {
+                return [500, 'Error al actualizar favoritos'];
             }
         });
     }

@@ -15,12 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.tableroRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const tableroController_1 = require("../controllers/tableroController");
+const tableroService_1 = require("../services/tableroService");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 exports.tableroRouter = express_1.default.Router();
 exports.tableroRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const [status, body] = yield tableroController_1.TableroController.getAll();
+    const [status, body] = yield tableroService_1.TableroService.getAllTableros();
     const estado = status;
     res.status(estado).json(body);
 }));
@@ -74,7 +75,16 @@ exports.tableroRouter.post('/creartablero', upload.any(), (req, res) => __awaite
     }
 }));
 exports.tableroRouter.delete('/eliminar/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = parseInt(req.params.id);
-    const [status, body] = yield tableroController_1.TableroController.delete(id);
+    const [status, body] = yield tableroController_1.TableroController.delete(req.params.id);
     res.status(status).json(body);
+}));
+exports.tableroRouter.post('/actualizarFav/:idTablero/:ponerFavorito', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const [status, message] = yield tableroController_1.TableroController.updateFav(req.params.idTablero, req.params.ponerFavorito === 'true');
+        res.status(status).json({ message });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error al actualizar el tablero' });
+    }
 }));
