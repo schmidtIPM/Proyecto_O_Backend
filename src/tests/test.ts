@@ -1,8 +1,8 @@
-jest.mock('../src/services/tableroService');
+jest.mock('../services/tableroService');
 
 import request from 'supertest';
-import app from '../src/Proyect_O';
-import { TableroService } from '../src/services/tableroService';
+import app from '../Proyect_O';
+import { TableroService } from '../services/tableroService';
 
 describe('Tablero service ', () => {
   beforeEach(() => {

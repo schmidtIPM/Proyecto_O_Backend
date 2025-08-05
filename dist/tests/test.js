@@ -12,22 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectToDatabase = connectToDatabase;
-const mongoose_1 = __importDefault(require("mongoose"));
-function connectToDatabase() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/Proyecto_O';
-        if (!uri) {
-            throw new Error('Uri no definido');
-        }
-        try {
-            yield mongoose_1.default.connect(uri);
-            console.log('Conectado a MongoDB');
-        }
-        catch (err) {
-            console.error('Error al conectar a MongoDB:', err);
-            process.exit(1);
-        }
+jest.mock('../src/services/tableroService');
+const supertest_1 = __importDefault(require("supertest"));
+const Proyect_O_1 = __importDefault(require("../Proyect_O"));
+const tableroService_1 = require("../services/tableroService");
+describe('Tablero service ', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
-}
-// connectToDatabase();
+    it('GET / devuelve una lista de tableros', () => __awaiter(void 0, void 0, void 0, function* () {
+        const mockTableros = { mensaje: "Hola, bienvenido a la API de tableros" };
+        tableroService_1.TableroService.getAllTableros.mockResolvedValue(mockTableros);
+        const response = yield (0, supertest_1.default)(Proyect_O_1.default).get('/');
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(mockTableros);
+    }));
+});
