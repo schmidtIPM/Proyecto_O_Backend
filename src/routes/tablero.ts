@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import { TableroController } from '../controllers/tableroController';
+import { TableroService } from '../services/tableroService';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -7,7 +8,7 @@ import fs from 'fs';
 export const tableroRouter: Router = express.Router();
 
 tableroRouter.get('/', async (req, res) => {
-  const [status, body] = await TableroController.getAll();
+  const [status, body] = await TableroService.getAllTableros();
   const estado = status as number;
   res.status(estado).json(body);
 });
